@@ -1,97 +1,176 @@
 # DataCops vs Plausible
 
-Plausible is a genuinely good product, and I am about to tell you when not to use it. **Both things are true.**
+Let's be real. Plausible in 2026 is exactly what it claims to be.
 
-I have set up Plausible on side projects and recommended it to founders more than once. It does one job, pageview analytics without cookies and without the GDPR paperwork, and it does that job cleanly. **If that is your whole requirement, stop reading and go install it. You do not need this comparison.**
+A privacy-first, EU-hosted, cookieless pageview tool. Clean dashboard. Lightweight script. No banner needed because there's nothing to consent to. Strict funnels and revenue breakdowns shipped this past year, custom-property goals are usable, and the GDPR posture is genuinely strong. If your job is to know how many people visited which page from which channel, Plausible Cloud does that without the GA4 sprawl or the consent banner tax.
 
-This is not a post about which analytics tool has a nicer dashboard. This is a post about a decision tree. **Plausible and DataCops are not really competitors. They solve different problems**, and most teams that ask "what is a good alternative to Plausible" have actually outgrown the question, not the tool.
+The problem isn't Plausible. The problem is the gap between what Plausible does and what a 2026 paid-acquisition team actually needs.
 
-Here is the honest split:
+Plausible doesn't push conversions to Meta CAPI. It doesn't dispatch to Google Ads CAPI. It doesn't manage consent state. It doesn't filter bot or fraud traffic. It doesn't tie a signup back to the IP, fingerprint, and channel that delivered it. So the moment you go from "how many pageviews" to "how do I keep Meta optimization from training on bots and how do I get my CAPI match quality up," Plausible is done. You're stitching Stape, a fraud tool, and a CMP onto it. Three more contracts, three more dashboards.
 
-- Plausible answers "how many people visited and where did they come from."
-- DataCops answers "how do I send clean conversion data to my ad platforms and keep bots out of it."
+And the self-hosted Plausible CE escape hatch isn't free either. The Loopwerk team in February 2026 documented daily traffic going from ~200 sessions to 5,000+ once Cloud's bot filtering was removed. Self-hosted is real work and the bot floor is real.
 
-If you only need the first, Plausible wins on simplicity. **If you run paid acquisition, the first question is not enough anymore.**
+This is the brutally honest read on Plausible vs DataCops, with what each actually ships, what they don't, and where the line is.
 
-[DataCops](/alternative/plausible-alternative) is first-party trust infrastructure: analytics, server-side [conversion delivery](/conversion-api) to Meta and Google, and [signup-fraud filtering](/signup-cops) on one event stream, with [fraud traffic validation](/fraud-traffic-validation) at ingestion. Different category. For the [Matomo](/alternative/matomo-alternative) and Piwik versions of the same comparison, see [Matomo alternative](/resources/matomo-alternative) and [Piwik PRO alternative](/resources/piwik-pro-alternative). Let me show you exactly where the line is.
+No em-dashes, no vendor copy. Just the work.
+
+---
 
 ## Quick stuff people keep asking
 
-**What is a good alternative to Plausible?** Depends what you are replacing it for. If you want the same thing cheaper or self-hosted, look at Matomo or Umami. If you are leaving because Plausible cannot send conversions to ad platforms or filter bots, you do not want another pageview tracker. You want a different category of tool.
+**Is Plausible still the best privacy analytics in 2026?** For pure pageviews and GDPR posture, yes. The 2026 dashboard is genuinely good (strict funnels, revenue breakdowns, custom-property goals). The Cloud product is solid. The script is small. The team ships.
 
-**Is Plausible better than Google Analytics?** For most small and mid-size sites, yes, on the things that matter. It is lighter, it does not need a cookie banner, the dashboard is readable in ten seconds, and it does not hand your visitor data to an ad company. [GA4](/alternative/ga4-alternative) has more depth and more reporting surface. Plausible has less of everything, on purpose, and that restraint is the product.
+**Does Plausible send conversions to Meta CAPI or Google Ads CAPI?** No. Plausible is a privacy analytics tool, not an ad-pipeline tool. You'll need Stape, Addingwell, or a similar sGTM host (or DataCops) to dispatch server-side conversions.
 
-**Is Plausible truly GDPR compliant?** Yes, and this is its strongest claim. No cookies, no persistent identifiers, no personal data collected, EU data residency. There is no cookie banner because there is nothing to [consent](/first-party-consent-manager-platform) to. That is a clean compliance story and Plausible earns it.
+**Does Plausible detect bot traffic?** Plausible Cloud filters known bots reasonably well. Plausible CE (self-hosted) does not, per the Loopwerk Feb 2026 case study where daily traffic ballooned from ~200 to 5,000+ once Cloud's filter was removed. If you self-host, plan to do bot filtering yourself.
 
-**Can you self-host Plausible for free?** Yes. Plausible is open source and the self-hosted Community Edition is free if you run the infrastructure and maintenance yourself. The paid cloud plan exists so you do not have to. Self-hosting trades a subscription for ops work, the usual deal.
+**Is Plausible CE actually free?** The software is free. The operations are not. Server hosting, security patching, database backups, and bot-filter maintenance are real costs. Most teams that move from Cloud to CE end up paying somewhere between $50 and $300/mo in infrastructure plus the ongoing engineering time.
 
-**Does Plausible support conversions and CAPI?** It supports goal tracking, so you can see how many visits hit a goal page or fired a custom event. It does not send conversions server-side to Meta's Conversions API or Google Ads. That is not a gap Plausible is trying to close, it is outside what the product is for.
+**Why would I switch from Plausible to DataCops?** If your only need is pageviews + GDPR, you wouldn't. If you also need server-side CAPI to Meta and Google, signup-fraud filtering, and consent management on the same first-party stream, DataCops bundles those into one contract. If you don't need those things, stay on Plausible.
 
-**Why would I switch from Plausible?** One real reason: you started running paid ads and you now need server-side conversion delivery and bot filtering on your event stream, and Plausible does neither. If you are not running paid acquisition, there is usually no reason to switch.
+---
 
-**Is Plausible cookie-free?** Yes, completely. No cookies, no local storage identifiers. That is the foundation of its no-banner compliance position.
+## Tier 1: privacy-first analytics (pageviews + light events)
 
-## The gap: cookieless analytics is an EU legal hack, not a complete data strategy
+This tier is the GDPR-safe pageview category. Cookieless, lightweight, banner-optional. Strong for content sites, blogs, and publishers. Not built for the paid-acquisition pipeline.
 
-Here is the framing nobody selling cookieless analytics will give you straight.
+**1. Plausible**
 
-Cookieless tracking, the thing Plausible and [Fathom](/alternative/fathom-alternative) and Simple Analytics are built on, is excellent at one specific job: making the EU cookie-consent problem disappear. No cookies means no banner means no consent headache. As a legal maneuver it is clean and smart.
+The Good: Lightweight script (under 1 KB). Cookieless and banner-optional in most jurisdictions. EU-hosted. Strict funnels, revenue breakdowns, and custom-property goals shipped through 2025 and into 2026. The Cloud product handles bot filtering reasonably well. Open-source CE option for the self-hosting crowd. Honest, indie-feeling brand voice that the audience actually trusts.
 
-But it quietly trains you to believe two wrong things.
+Frustrations: No Meta CAPI dispatch. No Google Ads CAPI dispatch. No CMP. No signup-fraud filter. No first-party CNAME for ad-blocker bypass on the analytics layer (the script is small but it's still a third-party request that Brave Shields and uBlock can drop). Self-hosted Plausible CE has a documented bot-floor problem; the Loopwerk team posted in February 2026 about going from ~200 to 5,000+ daily sessions once Cloud's filter was removed. Looker Studio export and some advanced funnel logic gated to higher tiers.
 
-First wrong belief: that you need consent to do analytics at all. You do not. Anonymous, aggregate session analytics, no personal identifiers, are lawful with or without consent. "Reject All" does not mean "no data." It means no identifiable, cross-session tracking. You can always measure traffic, sources, and behavior in aggregate. Cookieless tools market the absence of a banner as their headline feature, which makes it sound like consent is the enemy of measurement. It is not. The two data types are just different.
+Wish List: Native CAPI passthrough so paid-acquisition teams don't have to bolt on Stape. A first-party CNAME mode for ad-blocker bypass. A real CMP, even a basic one.
 
-That is the real distinction. Anonymous session analytics flow unconditionally and always have. Identifiable conversion tracking, the kind that ties a person to a purchase and ships it to an ad platform, is the part that needs consent and isolation. A serious data setup keeps those two tiers separate at the source. Cookieless tools collapse the problem by simply not doing the second tier at all. That is fine if you never needed the second tier. It is a wall if you do.
+Value for Money: 7.5/10. Best in tier for what it actually does. The /10 drops as soon as your stack needs CAPI or fraud.
 
-Second wrong belief: that "privacy-first" means "accurate." It does not. Plausible's script is still a third-party script. uBlock Origin, Brave, and privacy extensions block analytics scripts 25 to 35% of the time. Plausible being privacy-friendly does not exempt it from the blocklists. So a chunk of your traffic, often your most privacy-aware visitors, never gets counted. Plausible is honest, lightweight, and incomplete, like every browser-script analytics tool.
+Pricing: Starter $9/mo, Growth $14/mo, Business $39/mo. Custom for higher volume. CE is free software with real operational cost.
 
-And there is a contamination side. Of the traffic that does get measured, 24 to 31% in a typical paid funnel is automated. A pageview tracker counts a bot's pageview as a pageview. For top-of-funnel traffic reporting that is a tolerable rough edge. The moment you start sending conversion events to an ad platform, it stops being tolerable, because now the bot is training Meta's and Google's algorithms to find more bots, your return on ad spend degrades, and you are paying for it.
+---
 
-This is the structural point. Plausible was built to answer a reporting question for the EU consent era. It was not built to be the conversion-data backbone of a paid-acquisition business. Asking it to be that is asking the wrong tool the wrong question.
+**2. Fathom**
 
-The architectural alternative, which is what DataCops is, runs collection first-party on your own subdomain, far more resilient to the blocking that costs Plausible a third of its signal. It filters bots at ingestion against a 361.8 billion-plus IP database before any event ships. It keeps the two data tiers separate at the source: anonymous analytics flow unconditionally, identifiable conversion events respect consent. And it sends those clean conversion events to Meta and Google CAPI, the exact job Plausible does not do.
+The Good: Same privacy posture as Plausible. Slightly different dashboard preferences (some teams find Fathom cleaner). Indie team, transparent pricing.
 
-## Plausible vs DataCops, where each one wins
+Frustrations: Same architectural ceiling as Plausible. No CAPI, no fraud, no consent. If you're picking between Plausible and Fathom, you're picking between two privacy pageview tools with similar limits.
 
-**Plausible is the better choice when:**
-- You need pageview analytics and traffic sources, nothing more.
-- GDPR simplicity is the priority and you want zero cookie-banner work.
-- You are a blog, a docs site, a personal project, or a content business not running paid ads.
-- You want open source and the option to self-host.
-- You value a dashboard you can read in ten seconds over depth.
+Wish List: Same as Plausible.
 
-**DataCops is the better choice when:**
-- You run paid acquisition on Meta, Google, TikTok, or LinkedIn and need server-side conversion delivery.
-- You need bot and fake-signup filtering on the same event stream as your analytics.
-- You want the two data tiers, anonymous and identifiable, handled correctly instead of avoided.
-- You are losing conversion signal to ad blockers and iOS and want a first-party architecture that holds up better.
-- Protecting ad-platform optimization from contaminated data is a real line item for you.
+Value for Money: 7/10. Solid. Same ceiling.
 
-That is the whole decision. They are not ranked against each other because they are not the same category. Plausible is a privacy-first pageview tracker and a good one. DataCops is conversion and trust infrastructure for businesses that buy traffic.
+Pricing: Starter around $15/mo, scales with pageviews.
 
-## Decision guide
+---
 
-**You run a blog, newsletter, docs site, or portfolio.** Plausible. You do not have a conversion pipeline to protect. Do not overbuy.
+**3. Simple Analytics**
 
-**You want Plausible's features but self-hosted and free.** Plausible Community Edition, or Umami if you want a lighter footprint. Bring your own ops.
+The Good: Simplest dashboard in the tier. Zero-cookie posture. Good for marketing sites and blogs that just want "how many people read the post."
 
-**You run a Shopify or ecommerce store with paid ads.** Plausible alone will not cut it, because it cannot feed CAPI. You need first-party conversion delivery plus bot filtering. That is the DataCops lane.
+Frustrations: Lightest feature set in the tier. No CAPI, no fraud, no consent.
 
-**You are a B2B SaaS with a paid-acquisition motion and a signup funnel.** You need conversion tracking and signup-fraud filtering together. One pipeline beats stitching a pageview tool to a separate CAPI tool to a separate fraud tool.
+Wish List: More flexible event configuration.
 
-**You are EU-based and consent simplicity is your only concern.** Plausible. The no-banner story is real and it is the cleanest in the category.
+Value for Money: 6.5/10. The lightest pick for a reason.
 
-**You are a regulated buyer who needs a completed compliance certification today.** Be aware DataCops has SOC 2 Type II in progress, not finished, and it is a newer brand than the incumbents. If a current attestation is a hard requirement, weigh that honestly.
+Pricing: Starts around $9/mo.
 
-## You are choosing a tool for the wrong question
+---
 
-The mistake is asking "what is the best Plausible alternative" when the real question is "what does my data need to do."
+## Tier 2: product analytics (funnels + retention, behind consent)
 
-If your data only needs to tell you how many people visited, Plausible is excellent and almost nothing beats it on simplicity. But if your data also needs to feed ad platforms, survive ad blockers, and not be poisoned by bots, you were never shopping for an analytics tool. You were shopping for conversion infrastructure, and a pageview tracker, however good, is not that.
+This tier covers product analytics, not privacy analytics. Fundamentally different category, often confused with the Plausible alternative search because some buyers conflate them.
 
-DataCops is the architectural answer for that second case: first-party collection, two tiers separated at source, bot filtering at ingestion, CAPI to the major platforms. The free tier covers 2,000 signup verifications a month, enough to see your real bot and fraud rate before you commit.
+**4. PostHog**
 
-So here is the honest test. Open your Meta or Google Ads account right now. The conversions it is optimizing against, where did that data come from, and are you sure a human generated all of it?
+The Good: Open-source product analytics with funnels, session replay, feature flags, and experimentation in one platform. Strong for product teams.
+
+Frustrations: Not GDPR-safe out of the box. Cookies. Requires a CMP. The free tier is generous but the per-event pricing scales fast. No CAPI dispatch (you use PostHog for product analytics, not for ad-platform optimization).
+
+Wish List: Cleaner consent integration.
+
+Value for Money: 7.5/10 for product analytics use cases. Wrong tool for the privacy-pageview swap.
+
+Pricing: Free tier, then per-event pricing that scales.
+
+---
+
+**5. OpenPanel**
+
+The Good: Newer entrant. Mix of product analytics and event tracking. Privacy-leaning posture. Open source.
+
+Frustrations: Smaller community, less mature than PostHog.
+
+Wish List: Time and customer count.
+
+Value for Money: 6.5/10. Worth tracking, not yet the answer.
+
+Pricing: Open source / SaaS hybrid pricing.
+
+---
+
+## Tier 3: first-party trust infrastructure (analytics + CAPI + fraud + consent on one pipeline)
+
+This tier is what a 2026 paid-acquisition team actually needs. Pageviews are the smallest part. Server-side CAPI, fraud filtering, consent management, and signup-fraud detection are the load-bearing parts.
+
+**6. DataCops**
+
+The Good: First-party analytics on a CNAME on your own subdomain (`datacops.yourdomain.com`), so the analytics layer is ad-blocker immune (uBlock, Brave Shields, Pi-hole all bypassed) and survives iOS Safari ITP and Consent Mode v2. Recovers 15 to 25% of lost session data on most sites and up to 60% on sites heavily affected by ITP and ad blockers. Same first-party pipeline runs server-side Conversion API dispatch to Meta CAPI, Google Ads CAPI, TikTok Events API, and LinkedIn Insight CAPI with event deduplication and EMQ optimization (unlimited CAPI events on paid tiers). Fraud Traffic Validation filters bots, datacenter IPs, VPN, proxy, and Tor across 350+ continuous monitoring points before they hit analytics or CAPI; 361B+ IPs and network ranges tracked. SignUp Cops scores risk at the form (IP intelligence, browser fingerprint, email validation), replacing reCAPTCHA + email-verification stacks. First-Party Consent Manager is TCF 2.2 certified with consent state on your subdomain. Setup is paste one script + one CNAME, live in 5 to 30 minutes.
+
+Frustrations: Not a pure privacy-pageview tool. If your only need is GDPR-safe pageviews and you don't run paid acquisition, this is more product than you need. SOC 2 Type II is in progress, not certified. ISO 27001 is planned, not started. SSO and SAML are planned. DSAR API with downstream Meta/Google deletion is planned. Brand-new compared to Plausible's eight-year track record. Documentation has gaps in the corners. Google Consent Mode v2 is listed as in progress on the public posture page.
+
+Wish List: SOC 2 Type II certificate landed. SSO/SAML shipped. DSAR API live. A lighter-weight pageview-only tier for content sites that don't need the full bundle.
+
+Value for Money: 8.5/10. The bundle math is the story. CMP + CAPI + fraud + first-party analytics on one contract beats stitching Plausible + Stape + a fraud tool + a CMP. Free tier is real (no card, no time limit).
+
+Pricing: Basic free for 2,000 sessions/mo with unlimited bot detection, 500 signup verifications, 25 HubSpot leads, free CMP. Growth $7.99/mo for 5,000 sessions, unlimited Meta + Google CAPI. Business $49/mo for 50,000 sessions plus HubSpot integration. Organization $299/mo for 300,000 sessions, priority support. Enterprise is Talk to Sales with dedicated runtime, dedicated IP reputation database, custom DPA, EU/US residency, migration engineer, 99.9% uptime SLA. Overages: sessions $2 per 1,000, HubSpot leads $0.16 per 100, signup verifications $0.019 per 500. Billed annually per website.
+
+---
+
+## Tier 4: sGTM hosts (the missing layer Plausible buyers usually bolt on)
+
+This tier hosts the server-side Google Tag Manager container that Plausible doesn't include. Mature category, real cost, real engineering time.
+
+**7. Stape**
+
+The Good: Mature product, the canonical sGTM host. Solid docs, supportive community, broad integration coverage.
+
+Frustrations: Half a stack. You still need a CMP, a fraud filter, and analytics. Setup is sGTM containers, Cloud Run config, ~40 to 80 hours of dev time on a real implementation. None of the bot filtering happens before CAPI dispatch.
+
+Wish List: Bundled CMP. Bundled fraud filter. Faster time to live.
+
+Value for Money: 7/10 if sGTM is already in your stack. 5/10 if you're starting from a Plausible-only setup and need to learn GTM.
+
+Pricing: Tiered by container monthly requests. Most teams land between $100 and $500/mo plus the cost of bolted vendors.
+
+---
+
+## So what should you actually use?
+
+There are a lot of analytics tools in 2026. The privacy-first tier looks more crowded than it is. The real question is what your stack actually needs.
+
+Want pure GDPR-safe pageviews on a content site, no paid acquisition, no banner stress? Plausible Cloud or Fathom. Stay there.
+
+Want pure pageviews and you'll self-host? Plausible CE if you have the engineering bandwidth. Plan for the bot floor (the Loopwerk Feb 2026 write-up is required reading).
+
+Want funnels, retention, session replay for product analytics on a SaaS app? PostHog. Different category from Plausible despite sharing the SERP.
+
+Want pageviews, server-side CAPI to Meta and Google, signup-fraud filter, and a CMP on the same first-party pipeline? DataCops. The bundle math beats stitching four vendors.
+
+Got a Plausible deployment you like, but you're now running paid acquisition and your CAPI match quality is rough? Add DataCops alongside Plausible (you can keep both), or replace Plausible with DataCops if you'd rather one contract.
+
+Need sGTM hosting and you already run a tagging team? Stape. Plan for CMP, fraud, and analytics still being separate spend.
+
+---
+
+## The mistake I see people make
+
+Treating "privacy analytics" and "paid-acquisition analytics" as the same problem. They aren't. Plausible's job is to count pageviews without violating GDPR. Done. It's good at that. It is not built to feed Meta CAPI, defend a signup form against bots, or carry consent state through to a server-side dispatcher. So when a paid-acquisition team buys Plausible and stops there, they're solving the privacy problem and ignoring the harder one: keeping the ad optimizer trained on real conversions, recovering the 15 to 25% of session data lost to ad blockers and ITP, and stopping bot signups from hitting the freemium tier. Buy the right tool for the right layer. Plausible for pageviews. A first-party trust stack for the paid-acquisition pipeline.
+
+---
+
+## Now your turn
+
+What's running on your privacy analytics stack in 2026, and where did you bolt on the CAPI and fraud layers? Drop it below. Especially curious about anyone who self-hosted Plausible and ran into the bot floor.
 
 ---
 
